@@ -6,7 +6,16 @@ Quick-start for testing without Streamlit.
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+sys.path.insert(0, '/Workspace/Users/akhlesh_kumar@epam.com/virtual-financial-advisor')
+
+import subprocess
+import sys
+
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'langchain-core<1.0', 'langchain-community', 'pandas>=2.0'])
+
+dbutils.library.restartPython()
 
 from src.agent.agent_core import init_agent
 
