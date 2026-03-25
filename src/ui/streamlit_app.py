@@ -27,6 +27,7 @@ from src.scenario_simulation import (
     compare_scenarios,
     project_balance,
 )
+from src.env_utils import is_databricks, default_llm_model, default_data_path
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Virtual Financial Advisor", page_icon="💰", layout="wide")
@@ -35,15 +36,17 @@ st.title("💰 Virtual Financial Advisor")
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.header("Configuration")
-    data_path = st.text_input("Data path", value="data/virtual_financial_advisor_data.csv")
+    env_label = "Databricks" if is_databricks() else "Local"
+    st.caption(f"Environment: {env_label}")
+    data_path = st.text_input("Data path", value=default_data_path())
     user_ids = [f"user_{i}" for i in range(1, 21)]
     selected_user = st.selectbox("Select User", user_ids)
     st.markdown("---")
     st.subheader("LLM Settings")
     llm_model = st.text_input(
         "LLM Model",
-        value=os.getenv("LLM_MODEL", "ollama/llama3.1"),
-        help="e.g. databricks/databricks-meta-llama-3-1-70b-instruct, ollama/llama3.1",
+        value=default_llm_model(),
+        help="e.g. databricks/databricks-meta-llama-3-1-70b-instruct, ollama/llama3.1, openai/gpt-4",
     )
     os.environ["LLM_MODEL"] = llm_model
 
@@ -253,9 +256,17 @@ with tab_chat:
                         )
 
                     response = st.session_state.agent_executor.invoke(
-                        {"input": user_input}
+                        {"messages": [{"role": "user", "content": user_input}]}
                     )
-                    answer = response.get("output", str(response))
+                    messages = response.get("messages", [])
+                    # Extract the last AI message content
+                    answer = ""
+                    for msg in reversed(messages):
+                        if hasattr(msg, "content") and getattr(msg, "type", None) == "ai" and msg.content:
+                            answer = msg.content
+                            break
+                    if not answer:
+                        answer = str(response)
                 except Exception as e:
                     answer = (
                         f"⚠️ Agent error: {e}\n\n"

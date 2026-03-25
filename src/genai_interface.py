@@ -8,6 +8,8 @@ import os
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 
+from src.env_utils import default_llm_model
+
 
 # ── LLM Factory ───────────────────────────────────────────────────────────────
 
@@ -25,7 +27,7 @@ def get_llm(model_name: str | None = None, **kwargs) -> BaseChatModel:
       - "ollama/<model>"      → ChatOllama     (local dev)
       - "openai/<model>"      → ChatOpenAI     (OpenAI-compatible)
     """
-    model_name = model_name or os.getenv("LLM_MODEL", "databricks/databricks-meta-llama-3-1-70b-instruct")
+    model_name = model_name or default_llm_model()
 
     if model_name.startswith("databricks/"):
         from langchain_community.chat_models import ChatDatabricks

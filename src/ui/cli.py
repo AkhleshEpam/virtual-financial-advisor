@@ -8,25 +8,19 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-#sys.path.insert(0, '/Workspace/Users/akhlesh_kumar@epam.com/virtual-financial-advisor')
-
-import subprocess
-import sys
-
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'langchain-core<1.0', 'langchain-community', 'pandas>=2.0'])
-
-dbutils.library.restartPython()
-
+from src.env_utils import is_databricks, default_llm_model, default_data_path
 from src.agent.agent_core import init_agent
 
 
 def main():
-    data_path = os.getenv("DATA_PATH", "data/virtual_financial_advisor_data.csv")
+    data_path = default_data_path()
     print("=" * 60)
     print("  Virtual Financial Advisor — CLI")
     print("=" * 60)
+    env_label = "Databricks" if is_databricks() else "Local"
+    print(f"Environment: {env_label}")
     print(f"Data: {data_path}")
-    print(f"LLM:  {os.getenv('LLM_MODEL', 'databricks/databricks-meta-llama-3-1-70b-instruct')}")
+    print(f"LLM:  {default_llm_model()}")
     print("Type 'quit' or 'exit' to stop.\n")
 
     try:
@@ -49,8 +43,16 @@ def main():
             break
 
         try:
-            response = agent.invoke({"input": user_input})
-            answer = response.get("output", str(response))
+            response = agent.invoke({"messages": [{"role": "user", "content": user_input}]})
+            messages = response.get("messages", [])
+            # Extract the last AI message content
+            answer = ""
+            for msg in reversed(messages):
+                if hasattr(msg, "content") and getattr(msg, "type", None) == "ai" and msg.content:
+                    answer = msg.content
+                    break
+            if not answer:
+                answer = str(response)
         except Exception as e:
             answer = f"Error: {e}"
 

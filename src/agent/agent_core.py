@@ -7,11 +7,8 @@ import json
 import os
 from typing import Optional
 
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain_core.prompts import PromptTemplate
+from langchain.agents import create_agent
 from langchain_core.tools import tool
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from src.agent.memory import SessionMemory
 
@@ -168,12 +165,6 @@ You are a Virtual Financial Advisor Agent. You help bank customers understand
 their financial health by analyzing transactions, detecting risks, running
 simulations, and providing personalized advice.
 
-You have access to the following tools:
-
-{tools}
-
-Tool names: {tool_names}
-
 When a user asks a question:
 1. If no user data is loaded yet, use `load_user_data` first.
 2. Analyze their spending with `analyze_spending` and `classify_expenses`.
@@ -182,12 +173,6 @@ When a user asks a question:
 5. For personalized advice, use `get_advice`.
 
 Always provide clear, helpful, and data-driven responses.
-
-Previous conversation:
-{chat_history}
-
-Question: {input}
-{agent_scratchpad}
 """
 
 
@@ -198,9 +183,9 @@ def init_agent(
     data_path: str = "data/virtual_financial_advisor_data.csv",
     llm=None,
     session_memory: Optional[SessionMemory] = None,
-) -> AgentExecutor:
+):
     """
-    Initialize and return the Financial Advisor AgentExecutor.
+    Initialize and return the Financial Advisor agent graph.
 
     Parameters
     ----------
@@ -221,19 +206,10 @@ def init_agent(
 
     _session = session_memory or SessionMemory()
 
-    prompt = PromptTemplate(
-        input_variables=["input", "chat_history", "agent_scratchpad", "tools", "tool_names"],
-        template=AGENT_SYSTEM_PROMPT,
-    )
-
-    agent = create_react_agent(llm=llm, tools=TOOLS, prompt=prompt)
-
-    executor = AgentExecutor(
-        agent=agent,
+    agent = create_agent(
+        model=llm,
         tools=TOOLS,
-        verbose=True,
-        handle_parsing_errors=True,
-        max_iterations=10,
+        system_prompt=AGENT_SYSTEM_PROMPT,
     )
 
-    return executor
+    return agent
