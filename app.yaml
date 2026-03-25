@@ -1,8 +1,13 @@
-app:
-  source_code_path: "."
-  entrypoint: "src/ui/streamlit_app.py"
-  framework: "streamlit"
-  port: 8501
-  env:
-    LLM_MODEL: "databricks/databricks-meta-llama-3-1-70b-instruct"
-    DATA_PATH: "/dbfs/FileStore/virtual_financial_advisor_data.csv"
+command:
+  - "streamlit"
+  - "run"
+  - "src/ui/streamlit_app.py"
+  - "--server.port=8501"
+  - "--server.headless=true"
+  - "--server.address=0.0.0.0"
+
+env:
+  - name: "LLM_MODEL"
+    value: "databricks/databricks-meta-llama-3-1-70b-instruct"
+  - name: "DATA_PATH"
+    value: "/dbfs/FileStore/virtual_financial_advisor_data.csv"
