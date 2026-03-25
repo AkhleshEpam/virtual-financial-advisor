@@ -1,0 +1,8 @@
+app:
+  source_code_path: "."
+  entrypoint: "src/ui/streamlit_app.py"
+  framework: "streamlit"
+  port: 8501
+  env:
+    LLM_MODEL: "databricks/databricks-meta-llama-3-1-70b-instruct"
+    DATA_PATH: "/dbfs/FileStore/virtual_financial_advisor_data.csv"
