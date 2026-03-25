@@ -10,4 +10,4 @@ env:
   - name: "LLM_MODEL"
     value: "databricks/databricks-meta-llama-3-1-70b-instruct"
   - name: "DATA_PATH"
-    value: "/dbfs/FileStore/virtual_financial_advisor_data.csv"
+    value: "data/virtual_financial_advisor_data.csv"
