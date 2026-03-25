@@ -6,9 +6,9 @@ Quick-start for testing without Streamlit.
 import sys
 import os
 
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-sys.path.insert(0, '/Workspace/Users/akhlesh_kumar@epam.com/virtual-financial-advisor')
+#sys.path.insert(0, '/Workspace/Users/akhlesh_kumar@epam.com/virtual-financial-advisor')
 
 import subprocess
 import sys
