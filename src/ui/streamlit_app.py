@@ -33,14 +33,50 @@ from src.env_utils import is_databricks, default_llm_model, default_data_path
 st.set_page_config(page_title="Virtual Financial Advisor", page_icon="💰", layout="wide")
 st.title("💰 Virtual Financial Advisor")
 
+# ── Helpers ────────────────────────────────────────────────────────────────────
+
+def _list_csv_files(folder: str = "data") -> list[str]:
+    """Return CSV file paths found in *folder*, sorted alphabetically."""
+    if not os.path.isdir(folder):
+        return []
+    return sorted(
+        os.path.join(folder, f).replace("\\", "/")
+        for f in os.listdir(folder)
+        if f.lower().endswith(".csv")
+    )
+
+@st.cache_data
+def load_and_prepare(path, user_id):
+    df = preprocess(load_data(path))
+    user_df = get_user_data(df, user_id)
+    return df, user_df
+
+@st.cache_data
+def load_user_list(path):
+    df = preprocess(load_data(path))
+    return sorted(df["user_id"].unique().tolist())
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
+csv_files = _list_csv_files("data")
+default_idx = 0
+_default_path = default_data_path()
+if _default_path in csv_files:
+    default_idx = csv_files.index(_default_path)
+
 with st.sidebar:
     st.header("Configuration")
     env_label = "Databricks" if is_databricks() else "Local"
     st.caption(f"Environment: {env_label}")
-    data_path = st.text_input("Data path", value=default_data_path())
-    user_ids = [f"user_{i}" for i in range(1, 21)]
-    selected_user = st.selectbox("Select User", user_ids)
+    data_path = st.selectbox("📂 Data File", csv_files, index=default_idx)
+
+# Load user list from selected file so the user dropdown updates on file switch
+try:
+    user_ids = load_user_list(data_path)
+except Exception:
+    user_ids = []
+
+with st.sidebar:
+    selected_user = st.selectbox("👤 Select User", user_ids)
     st.markdown("---")
     st.subheader("LLM Settings")
     llm_model = st.text_input(
@@ -49,13 +85,6 @@ with st.sidebar:
         help="e.g. databricks/databricks-meta-llama-3-1-70b-instruct, ollama/llama3.1, openai/gpt-4",
     )
     os.environ["LLM_MODEL"] = llm_model
-
-# ── Load data ─────────────────────────────────────────────────────────────────
-@st.cache_data
-def load_and_prepare(path, user_id):
-    df = preprocess(load_data(path))
-    user_df = get_user_data(df, user_id)
-    return df, user_df
 
 try:
     full_df, user_df = load_and_prepare(data_path, selected_user)

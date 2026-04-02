@@ -25,5 +25,5 @@ def default_data_path() -> str:
     if os.getenv("DATA_PATH"):
         return os.environ["DATA_PATH"]
     if is_databricks():
-        return "/dbfs/FileStore/virtual_financial_advisor_data.csv"
-    return "data/virtual_financial_advisor_data.csv"
+        return "/dbfs/FileStore/virtual_financial_advisor_data_v2.csv"
+    return "data/virtual_financial_advisor_data_v2.csv"

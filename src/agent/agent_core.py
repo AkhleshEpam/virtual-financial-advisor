@@ -28,13 +28,13 @@ def _ensure_data():
 
 @tool
 def load_user_data(user_id: str) -> str:
-    """Load and summarize financial data for a specific user. Input: user_id (e.g. 'user_1')."""
+    """Load and summarize financial data for a specific user. Input: user_id (e.g. 'Aarav_Sharma')."""
     global _df, _user_df, _session
 
     from src.data_loader import load_data, preprocess, get_user_data, get_summary_stats
 
     path = _data_path or os.getenv(
-        "DATA_PATH", "data/virtual_financial_advisor_data.csv"
+        "DATA_PATH", "data/virtual_financial_advisor_data_v2.csv"
     )
     _df = preprocess(load_data(path))
     _user_df = get_user_data(_df, user_id)
@@ -180,7 +180,7 @@ TOOLS = [load_user_data, analyze_spending, classify_expenses, detect_risks, simu
 
 
 def init_agent(
-    data_path: str = "data/virtual_financial_advisor_data.csv",
+    data_path: str = "data/virtual_financial_advisor_data_v2.csv",
     llm=None,
     session_memory: Optional[SessionMemory] = None,
 ):
